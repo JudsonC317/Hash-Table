@@ -1,0 +1,171 @@
+# MP7testPlan.txt
+# Judson Cooper
+# MP7
+#
+# This is a test plan for MP7. It contains the output of the test script for MP7,
+# some commentary on how the output shows the proper functionality of the program,
+# and some details on the implementation of the hash table.
+#
+# First the test plan driver is run. This driver tests several boundary conditions,
+# and in each case the issue is properly resolved by the table. Next we
+# test the output when a small even number is used for the table size with
+# double hashing, and a number not a power of two as the table size with
+# quadratic hashing. In both cases the program exits after determining it will
+# not be able to find a spot to insert the new entry, as the table size was
+# poorly designed. These cases fail, even though the table is not full, because
+# the search function skips past several position in the table and repeatedly looks
+# at the same positions in a loop due to the value of the probe decrement. When
+# the program sees it has looped around the whole table without looking at every
+# address, even though the table is not full, it recognizes the poor design and
+# exits. 
+#
+# The deletion driver is then run, to test simple deletions. These give the proper
+# output as well, although part b of the deletion driver does not exactly match
+# homework question 8 since the document for MP7 did not ask for 11 to be removed
+# from the table, while homework question 8 did ask for this key to be removed.
+# Finally, the equilibrium driver is run with valgrind to show there are no
+# memory leaks. Valgrind's output couldn't be redirected to this file, however,
+# but it did show no errors or leaks.
+#
+# To implement the hash table, a header block was made to store the table
+# itself in addition to some other info about the table, such as its size
+# and probing type, which could be specified by the user. Several functions
+# were given to allow interaction with the table, including construct and
+# destruct, insert, delete, and add, and a debug print. The hash function
+# and probe decrement function were also added into the table.c file as private
+# functions. The probe function had three cases, one for each possible probe type,
+# which returned the proper decrement based on which probe was being used.
+# The hash function ran the function given in the specification for MP7.
+
+
+
+# 1) The test plan driver. Tests simple boundary cases to ensure the table
+# still functions properly
+
+Table size (11), load factor (0.9)
+Open addressing with linear probe sequence
+Seed: 1543343734
+
+Test 1: attempt to delete from empty table
+0	key: EMPTY
+1	key: EMPTY
+2	key: EMPTY
+3	key: EMPTY
+4	key: EMPTY
+
+Test 2: inserting into full table
+0	key: 105
+1	key: 101
+2	key: 102
+3	key: 103
+4	key: EMPTY
+The entry 104 should not appear
+
+Test 3: inserting duplicate key
+0	key: 105
+1	key: 101
+2	key: 102
+3	key: 103
+4	key: EMPTY
+Table should be unchanged
+
+Test 4: Deleting entry not in table
+0	key: 105
+1	key: 101
+2	key: 102
+3	key: 103
+4	key: EMPTY
+Table should be unchanged
+
+Test 5: Insert with a table size and decrement not covering all addresses
+About to insert 106
+0	key: 104
+1	key: EMPTY
+2	key: 102
+3	key: EMPTY
+Poorly designed probe sequence and table size
+
+
+
+# 2) Double hashing with a small even number
+
+Table size (8), load factor (0.9)
+Open addressing with double hashing
+Seed: 1543343734
+
+----- Retrieve driver -----
+  Trials: 50000
+  Build table with 7 random keys
+Poorly designed probe sequence and table size
+
+# Quadratic hashing with size not a power of 2
+
+Table size (15), load factor (0.9)
+Open addressing with quadratic probe sequence
+Seed: 1543343734
+
+----- Retrieve driver -----
+  Trials: 50000
+  Build table with 13 random keys
+Poorly designed probe sequence and table size
+
+
+
+# 3) Deletion driver
+
+Table size (11), load factor (0.9)
+Open addressing with linear probe sequence
+Seed: 1543343734
+
+Part a)
+0	key: EMPTY
+1	key: EMPTY
+2	key: 19
+3	key: 11
+4	key: DEL
+5	key: 26
+6	key: EMPTY
+
+Part b)
+The data found from retrieval of 16 is (nil)
+0	key: 14
+1	key: DEL
+2	key: DEL
+3	key: DEL
+4	key: 11
+5	key: 12
+6	key: 13
+
+
+
+# 4) Equilibrium to show no memory leaks
+# The output of valgrind was not able to be redirected into this text file,
+# but it did report no errors or leaks.
+
+Table size (11), load factor (0.9)
+Open addressing with linear probe sequence
+Seed: 1543343734
+
+----- Equilibrium test driver -----
+  Trials: 50000
+  Build table with 9 random keys
+    The average number of probes for a successful search = 2.44444
+  Keys added (23551), removed (23553) new size should be (7) and is (7)
+  After exercise, time=688.262 
+  successful searches during exercise=2.25033, trials=23553
+  unsuccessful searches during exercise=11.9985, trials=23551
+  After retrieve experiment, time=717.256
+  New load factor = 0.636364
+  Percent empty locations marked deleted = 100
+   Measured avg probes for successful search=3, trials=7
+   Measured avg probes for unsuccessful search=12, trials=50000
+    Do deletions increase avg number of probes?
+--- Linear probe sequence performance formulas ---
+    Expected probes for successful search 1.875
+    Expected probes for unsuccessful search 4.28125
+  Rehash table
+  After rehash, time=351.794
+   Measured avg probes for successful search=1.57143, trials=7
+   Measured avg probes for unsuccessful search=3.55964, trials=50000
+----- End of equilibrium test -----
+
